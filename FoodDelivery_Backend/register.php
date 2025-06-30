@@ -1,5 +1,5 @@
 <?php
-include 'db_config.php'; // make sure this is in the same folder
+include 'db_config.php'; 
 
 // Get the incoming JSON from Java
 $data = json_decode(file_get_contents("php://input"));
@@ -9,8 +9,9 @@ $username = $data->username;
 $password = $data->password;
 $confirmPassword = $data->confirmPassword;
 $phone = $data->phone;
+$role = $data->role; 
 
-// Basic validation
+//validation
 if ($password !== $confirmPassword) {
     echo json_encode(["status" => "error", "message" => "Passwords do not match."]);
     exit;
@@ -28,10 +29,10 @@ if ($result->num_rows > 0) {
     exit;
 }
 
-// Insert user
-$insertQuery = "INSERT INTO users (email, username, password, phone) VALUES (?, ?, ?, ?)";
+// Insert user with role
+$insertQuery = "INSERT INTO users (email, username, password, phone, role) VALUES (?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($insertQuery);
-$stmt->bind_param("ssss", $email, $username, $password, $phone);
+$stmt->bind_param("sssss", $email, $username, $password, $phone, $role);
 
 if ($stmt->execute()) {
     echo json_encode(["status" => "success", "message" => "User registered successfully."]);
