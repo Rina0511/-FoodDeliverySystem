@@ -1,25 +1,21 @@
 <?php
 include 'db_config.php';
-
 $data = json_decode(file_get_contents("php://input"));
-$user_id = $data->user_id;
-$total_price = $data->total_price;
-$cart = $data->cart;
 
-$conn->query("INSERT INTO orders (user_id, total_price) VALUES ('$user_id', '$total_price')");
-$order_id = $conn->insert_id;
+$customer_id = $data->customer_id;
+$items = json_encode($data->items);
+$total = $data->total;
 
-foreach ($cart as $item) {
-    $name = $item->name;
-    $quantity = $item->quantity;
+// Set status to "Pending"
+$status = "Pending";
 
-    // Get item_id from name
-    $q = $conn->query("SELECT id FROM menu WHERE name = '$name'");
-    $r = $q->fetch_assoc();
-    $item_id = $r['id'];
+$stmt = $conn->prepare("INSERT INTO orders (customer_id, items, total, payment_status) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("isds", $customer_id, $items, $total, $status);
 
-    $conn->query("INSERT INTO order_items (order_id, item_id, quantity) VALUES ('$order_id', '$item_id', '$quantity')");
+if ($stmt->execute()) {
+    $order_id = $conn->insert_id;
+    echo json_encode(["payment_status" => "success", "order_id" => $order_id]);
+} else {
+    echo json_encode(["payment_status" => "error", "error" => $stmt->error]);
 }
-
-echo json_encode(["message" => "Order placed!", "order_id" => $order_id]);
 ?>
