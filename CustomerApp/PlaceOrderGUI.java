@@ -109,7 +109,7 @@ public class PlaceOrderGUI {
                     JOptionPane.showMessageDialog(frame, "Order placed successfully!\nTotal: RM " + String.format("%.2f", totalAmount));
                     frame.dispose();
 
-                    // ✅ Attempt to open Payment window
+                
                     Payment paymentWindow = new Payment(totalAmount, items, orderId, customerId);
                     paymentWindow.setVisible(true);
 
