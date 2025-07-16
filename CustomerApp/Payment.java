@@ -20,9 +20,9 @@ public class Payment extends JFrame {
 
         setTitle("Payment");
         setSize(800, 700);
-        setLocationRelativeTo(null); // ✅ Center on screen
+        setLocationRelativeTo(null); 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setAlwaysOnTop(true); // ✅ Bring window to front
+        setAlwaysOnTop(true); 
 
         contentPane = new JPanel();
         contentPane.setBackground(new Color(255, 253, 208));
@@ -107,7 +107,6 @@ public class Payment extends JFrame {
 
         btnBack.addActionListener(e -> dispose());
 
-        // ✅ Final: Make it visible
         setVisible(true);
         System.out.println("Payment window shown.");
     }
