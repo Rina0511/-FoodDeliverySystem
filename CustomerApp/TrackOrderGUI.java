@@ -76,7 +76,6 @@ public class TrackOrderGUI extends JFrame {
 
                 String rider = extractValue(block, "\"assigned_rider\":");
 
-                // ✅ Show notification based on delivery status
                 if (deliveryStatus.equalsIgnoreCase("assigned")) {
                     NotificationHelper.showNotification("Order ID " + id + " is on the way!", "Order Assigned");
                 } else if (deliveryStatus.equalsIgnoreCase("delivered")) {
