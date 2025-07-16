@@ -3,84 +3,112 @@ package Interface;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import Interface.BackendConnector;
 
 public class Payment extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
-    private JTextField txtPending;
-    private JTextArea textArea;
+    private JTextField txtStatus;
+    private JTextField txtTotal;
+    private int customerId;
 
-    public Payment(double totalAmount, List<String> cartItems) {
+    public Payment(double totalAmount, List<String> cartItems, int orderId, int customerId) {
+        this.customerId = customerId;
+
+        System.out.println("Payment constructor loaded. customerId = " + customerId + ", orderId = " + orderId);
+
         setTitle("Payment");
-        setBounds(100, 100, 800, 700);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 700);
+        setLocationRelativeTo(null); // ✅ Center on screen
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setAlwaysOnTop(true); // ✅ Bring window to front
 
         contentPane = new JPanel();
         contentPane.setBackground(new Color(255, 253, 208));
         contentPane.setLayout(null);
         setContentPane(contentPane);
 
+        // Title
         JLabel lblTitle = new JLabel("Payment");
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
         lblTitle.setFont(new Font("Comic Sans MS", Font.BOLD, 50));
         lblTitle.setBounds(10, 10, 776, 78);
         contentPane.add(lblTitle);
 
-        JLabel lblNewLabel_1 = new JLabel("Total Amount      : RM");
-        lblNewLabel_1.setFont(new Font("Arial Black", Font.PLAIN, 15));
-        lblNewLabel_1.setBounds(214, 141, 184, 42);
-        contentPane.add(lblNewLabel_1);
+        // Total Amount
+        JLabel lblAmount = new JLabel("Total Amount      : RM");
+        lblAmount.setFont(new Font("Arial Black", Font.PLAIN, 15));
+        lblAmount.setBounds(214, 141, 184, 42);
+        contentPane.add(lblAmount);
 
-        JLabel lblNewLabel_1_1 = new JLabel("Payment Method:");
-        lblNewLabel_1_1.setFont(new Font("Arial Black", Font.PLAIN, 15));
-        lblNewLabel_1_1.setBounds(214, 260, 171, 42);
-        contentPane.add(lblNewLabel_1_1);
+        txtTotal = new JTextField(String.format("%.2f", totalAmount));
+        txtTotal.setFont(new Font("Arial Black", Font.PLAIN, 14));
+        txtTotal.setEditable(false);
+        txtTotal.setBounds(397, 152, 117, 25);
+        contentPane.add(txtTotal);
 
-        JLabel lblNewLabel_1_2 = new JLabel("Status                 : ");
-        lblNewLabel_1_2.setFont(new Font("Arial Black", Font.PLAIN, 15));
-        lblNewLabel_1_2.setBounds(214, 200, 171, 42);
-        contentPane.add(lblNewLabel_1_2);
+        // Status
+        JLabel lblStatus = new JLabel("Status                 : ");
+        lblStatus.setFont(new Font("Arial Black", Font.PLAIN, 15));
+        lblStatus.setBounds(214, 200, 171, 42);
+        contentPane.add(lblStatus);
 
-        txtPending = new JTextField("Pending");
-        txtPending.setFont(new Font("Arial Black", Font.PLAIN, 14));
-        txtPending.setColumns(10);
-        txtPending.setBounds(374, 211, 140, 31);
-        contentPane.add(txtPending);
+        txtStatus = new JTextField("Pending");
+        txtStatus.setFont(new Font("Arial Black", Font.PLAIN, 14));
+        txtStatus.setEditable(false);
+        txtStatus.setBounds(397, 211, 117, 25);
+        contentPane.add(txtStatus);
 
-        textArea = new JTextArea();
-        textArea.setEditable(false);
-        textArea.setBounds(397, 152, 117, 22);
-        textArea.setText(String.format("%.2f", totalAmount));
-        contentPane.add(textArea);
+        // Payment Method
+        JLabel lblPaymentMethod = new JLabel("Payment Method:");
+        lblPaymentMethod.setFont(new Font("Arial Black", Font.PLAIN, 15));
+        lblPaymentMethod.setBounds(214, 260, 171, 42);
+        contentPane.add(lblPaymentMethod);
 
-        JList<String> list = new JList<>(new String[]{"TnG e-Wallet", "FPX online banking", "Visa Card"});
-        list.setFont(new Font("Arial Black", Font.PLAIN, 12));
-        list.setBounds(374, 272, 140, 58);
-        contentPane.add(list);
+        JList<String> methodList = new JList<>(new String[]{"TnG e-Wallet", "FPX Online Banking", "Visa Card"});
+        methodList.setFont(new Font("Arial Black", Font.PLAIN, 12));
+        methodList.setBounds(397, 272, 140, 60);
+        methodList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        contentPane.add(methodList);
 
+        // Confirm Button
         JButton btnConfirm = new JButton("Confirm");
         btnConfirm.setFont(new Font("Comic Sans MS", Font.BOLD, 15));
-        btnConfirm.setBounds(438, 381, 97, 23);
+        btnConfirm.setBounds(438, 381, 97, 30);
         contentPane.add(btnConfirm);
 
         btnConfirm.addActionListener(e -> {
-            String paymentType = list.getSelectedValue();
-            if (paymentType == null || paymentType.isEmpty()) {
+            String selectedMethod = methodList.getSelectedValue();
+            if (selectedMethod == null || selectedMethod.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please select a payment method.", "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Payment successful via " + paymentType + "!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose(); // Close Payment window
-                new Receipt(totalAmount, cartItems); // `items` is your cart list
+                return;
+            }
 
+            String jsonData = "{\"order_id\":" + orderId + "}";
+            String url = "http://localhost/FoodDelivery_Backend/update_payment_status.php";
+            String response = BackendConnector.sendPost(url, jsonData);
+
+            if (response.contains("\"payment_status\":\"success\"")) {
+                txtStatus.setText("Paid");
+                JOptionPane.showMessageDialog(this, "Payment successful via " + selectedMethod + "!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+                new Receipt(totalAmount, cartItems, customerId).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Payment succeeded but failed to update status.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
 
+        // Back Button
         JButton btnBack = new JButton("Back");
         btnBack.setFont(new Font("Comic Sans MS", Font.BOLD, 15));
-        btnBack.setBounds(199, 381, 97, 23);
+        btnBack.setBounds(199, 381, 97, 30);
         contentPane.add(btnBack);
 
         btnBack.addActionListener(e -> dispose());
+
+        // ✅ Final: Make it visible
+        setVisible(true);
+        System.out.println("Payment window shown.");
     }
 }
