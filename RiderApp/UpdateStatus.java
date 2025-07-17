@@ -3,13 +3,14 @@ package rider;
 import javax.swing.*;
 import java.awt.*;
 import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 public class UpdateStatus {
 
-    public UpdateStatus() {
+    public UpdateStatus(int riderId) {
         JFrame frame = new JFrame("Update Order Status");
         frame.setSize(400, 250);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -32,7 +33,7 @@ public class UpdateStatus {
         lblStatus.setBounds(50, 90, 100, 25);
         frame.add(lblStatus);
 
-        String[] statuses = {"Pending", "In Transit", "Delivered"};
+        String[] statuses = {"pending", "assigned", "delivered"}; // match lowercase used in DB
         JComboBox<String> statusBox = new JComboBox<>(statuses);
         statusBox.setBounds(160, 90, 150, 25);
         frame.add(statusBox);
@@ -53,23 +54,46 @@ public class UpdateStatus {
             }
 
             try {
-                URL url = new URL("http://localhost/backend-api/update_status.php");
+            	String endpoint = "";
+            	String json;
+
+            	if (newStatus.equalsIgnoreCase("assigned")) {
+            	    endpoint = "accept_order.php";
+            	    json = "{\"order_id\":" + orderId + ", \"rider_id\":" + riderId + "}";
+            	} else if (newStatus.equalsIgnoreCase("delivered")) {
+            	    endpoint = "mark_delivered.php";
+            	    json = "{\"order_id\":" + orderId + ", \"status\":\"delivered\"}";
+            	} else {
+            	    JOptionPane.showMessageDialog(frame, "Invalid status selected.");
+            	    return;
+            	}
+
+            	URL url = new URL("http://localhost/FoodDelivery_Backend/" + endpoint);
+
+
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
 
-                String data = "order_id=" + URLEncoder.encode(orderId, "UTF-8") +
-                              "&status=" + URLEncoder.encode(newStatus, "UTF-8");
+                //String json = "{\"order_id\":" + orderId + ", \"status\":\"" + newStatus + "\"}";
 
                 OutputStream os = conn.getOutputStream();
-                os.write(data.getBytes());
+                os.write(json.getBytes());
                 os.flush();
                 os.close();
 
                 int responseCode = conn.getResponseCode();
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
 
-                if (responseCode == 200) {
-                    JOptionPane.showMessageDialog(frame, "Order status updated successfully.");
+                if (responseCode == 200 && response.toString().contains("success")) {
+                    JOptionPane.showMessageDialog(frame, "Order status updated.");
                     frame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(frame, "Failed to update status.");
@@ -86,6 +110,6 @@ public class UpdateStatus {
     }
 
     public static void main(String[] args) {
-        new UpdateStatus(); // For testing
+        new UpdateStatus(1); // for standalone testing
     }
 }
