@@ -1,17 +1,14 @@
 package rider;
 
 import javax.swing.*;
+import org.json.JSONObject;
 import java.awt.*;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 
 public class RegisterRider {
 
     public RegisterRider() {
         JFrame frame = new JFrame("Rider Registration");
-        frame.setSize(450, 430);
+        frame.setSize(450, 500); // Increased height for extra field
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLayout(null);
         frame.getContentPane().setBackground(new Color(0, 100, 0));
@@ -22,83 +19,66 @@ public class RegisterRider {
         title.setBounds(90, 20, 300, 30);
         frame.add(title);
 
-        // Labels and text fields
-        String[] labels = {"Name:", "Email:", "Password:", "Phone:"};
-        JLabel[] lbls = new JLabel[labels.length];
+        // Labels and fields
+        String[] labels = {"Name", "Email", "Password", "Confirm Password", "Phone", "Address"};
         JTextField[] fields = new JTextField[labels.length];
 
         for (int i = 0; i < labels.length; i++) {
-            lbls[i] = new JLabel(labels[i]);
-            lbls[i].setForeground(Color.WHITE);
-            lbls[i].setFont(new Font("Rockwell", Font.PLAIN, 16));
-            lbls[i].setBounds(50, 80 + i * 50, 100, 25);
-            frame.add(lbls[i]);
+            JLabel label = new JLabel(labels[i] + ":");
+            label.setForeground(Color.WHITE);
+            label.setFont(new Font("Rockwell", Font.PLAIN, 16));
+            label.setBounds(50, 70 + i * 45, 150, 25);
+            frame.add(label);
 
-            if (labels[i].equals("Password:")) {
+            if (labels[i].toLowerCase().contains("password")) {
                 fields[i] = new JPasswordField();
             } else {
                 fields[i] = new JTextField();
             }
-            fields[i].setBounds(160, 80 + i * 50, 200, 25);
+            fields[i].setBounds(210, 70 + i * 45, 170, 25);
             frame.add(fields[i]);
         }
 
         JButton btnRegister = new JButton("Register");
         btnRegister.setFont(new Font("Rockwell", Font.BOLD, 16));
         btnRegister.setBackground(new Color(220, 184, 144));
-        btnRegister.setBounds(150, 300, 130, 35);
+        btnRegister.setBounds(150, 70 + labels.length * 45 + 10, 130, 35); // Position below last field
         frame.add(btnRegister);
 
         btnRegister.addActionListener(e -> {
-            String name = fields[0].getText();
+            String username = fields[0].getText();
             String email = fields[1].getText();
             String password = new String(((JPasswordField) fields[2]).getPassword());
-            String phone = fields[3].getText();
+            String confirm = new String(((JPasswordField) fields[3]).getPassword());
+            String phone = fields[4].getText();
+            String address = fields[5].getText(); // ✅ New field
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty()) {
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty() || phone.isEmpty() || address.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "All fields are required.");
                 return;
             }
 
-            try {
-                URL url = new URL("http://localhost/backend-api/register.php");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
+            JSONObject json = new JSONObject();
+            json.put("username", username);
+            json.put("email", email);
+            json.put("password", password);
+            json.put("confirmPassword", confirm);
+            json.put("phone", phone);
+            json.put("address", address); // ✅ Added to JSON
+            json.put("role", "rider");
 
-                String data = "username=" + URLEncoder.encode(name, "UTF-8") +
-                              "&email=" + URLEncoder.encode(email, "UTF-8") +
-                              "&password=" + URLEncoder.encode(password, "UTF-8") +
-                              "&phone=" + URLEncoder.encode(phone, "UTF-8") +
-                              "&role=rider";
+            String response = BackendConnectorRider.sendPost("http://localhost/FoodDelivery_Backend/register.php", json.toString());
 
-                OutputStream os = conn.getOutputStream();
-                os.write(data.getBytes());
-                os.flush();
-                os.close();
-
-                int responseCode = conn.getResponseCode();
-                if (responseCode == 200) {
-                    JOptionPane.showMessageDialog(frame, "Rider registered successfully!");
-                    frame.dispose();
-                    new LoginRider(); // Go back to login screen
-                } else if (responseCode == 409) {
-                    JOptionPane.showMessageDialog(frame, "Username already exists.");
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Registration failed. Try again.");
-                }
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
-                ex.printStackTrace();
+            if (response != null && response.contains("\"status\":\"success\"")) {
+                JOptionPane.showMessageDialog(frame, "Registered successfully.");
+                frame.dispose();
+                new LoginRider();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Registration failed: " + response);
             }
         });
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        new RegisterRider();
     }
 }
