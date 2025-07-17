@@ -1,11 +1,8 @@
 package rider;
 
 import javax.swing.*;
+import org.json.JSONObject;
 import java.awt.*;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 
 public class LoginRider {
 
@@ -64,36 +61,22 @@ public class LoginRider {
             String username = txtUser.getText();
             String password = new String(txtPass.getPassword());
 
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "Please enter username and password.");
+            JSONObject json = new JSONObject();
+            json.put("username", username);
+            json.put("password", password);
+            json.put("role", "rider");
+
+            String response = BackendConnectorRider.sendPost("http://localhost/FoodDelivery_Backend/login.php", json.toString());
+
+            if (response != null && response.contains("\"status\":\"success\"")) {
+                JOptionPane.showMessageDialog(frame, "Login successful.");
+                JSONObject jsonResponse = new JSONObject(response);
+                int riderId = jsonResponse.getInt("id");
+
+                frame.dispose(); 
+                new ViewTasks(riderId); 
             } else {
-                try {
-                    URL url = new URL("http://localhost/backend-api/login_rider.php");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setDoOutput(true);
-
-                    String postData = "username=" + URLEncoder.encode(username, "UTF-8") +
-                                      "&password=" + URLEncoder.encode(password, "UTF-8");
-
-                    OutputStream os = conn.getOutputStream();
-                    os.write(postData.getBytes());
-                    os.flush();
-                    os.close();
-
-                    int responseCode = conn.getResponseCode();
-
-                    if (responseCode == 200) {
-                        new ViewTasks(); // Proceed to Rider screen
-                        frame.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Invalid login. Please register first.");
-                    }
-
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, "Error connecting to backend: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
+                JOptionPane.showMessageDialog(frame, "Invalid credentials or not registered.");
             }
         });
 
