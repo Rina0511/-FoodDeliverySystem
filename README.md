@@ -76,7 +76,7 @@ get_orders.php (Returns customer-specific order data)
 food_deliverysystem.sql (SQL dump file containing tables and data for the project)
 
 
-## 🚀 Features
+##  Features
 
 ### Customer App
 - Register/Login
@@ -99,19 +99,19 @@ food_deliverysystem.sql (SQL dump file containing tables and data for the projec
 - Uses one 'users' table and one 'orders' table
 - Foreign key: orders.customer_id → users.id
 
-## 📡 Technologies Used
+##  Technologies Used
 - Java Swing (GUI)
 - PHP (REST API)
 - MySQL (phpMyAdmin)
 - Google Maps (Tracking via address)
 - Apache (XAMPP)
 
-## 🔒 Security
+##  Security
 - Passwords hashed using 'password_hash()' / 'password_verify()'
 - Prepared statements used to avoid SQL injection
 - Backend role-based validation
 
-## 🎓 Project Requirements Covered
+##  Project Requirements Covered
 
 | Requirement                         | Status  |
 |-------------------------------------|---------|
@@ -124,7 +124,7 @@ food_deliverysystem.sql (SQL dump file containing tables and data for the projec
 | Google Maps API integration         | Yes     |
 | Commercial value demonstrated       | Yes     |
 
-## 👥 Team Roles
+##  Team Roles
 
 | Member       | Role                         |
 |--------------|------------------------------|
@@ -135,7 +135,7 @@ food_deliverysystem.sql (SQL dump file containing tables and data for the projec
 | Fazrina      | Backend – PHP APIs           |
 | Kaminishvary | Backend – DB Design/Security |
 
-## 🛠️ Setup Instructions
+##  Setup Instructions
 
 1. Import 'food_deliverysystem.sql' into phpMyAdmin
 2. Place PHP files in 'htdocs/FoodDelivery_Backend'
@@ -145,6 +145,6 @@ food_deliverysystem.sql (SQL dump file containing tables and data for the projec
 
 ---
 
-## 📄 License
+##  License
 
 This project is created for academic purposes under BITP 3123 (Utem, 2025).
