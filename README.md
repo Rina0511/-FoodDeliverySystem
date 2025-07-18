@@ -39,47 +39,42 @@ System Flow:
 
 This is a Java + PHP + MySQL food delivery system built for BITP 3123 (Distributed Application Development). It simulates a basic food ordering process with two applications — a Customer App and a Rider App — both integrated with a common backend API.
 
-## Project Structure
 
+**Project Structure OrientalCoffee**
+**CustomerApp (Java Swing application for customers)**
+Login.java
+Register.java
+MenuGUI.java (Static menu with hardcoded items and images)
+PlaceOrderGUI.java
+BackendConnector.java (Handles HTTP requests to backend)
+Main.java (Main launcher class)
+NotificationHelper.java (Popup messages for actions)
+Payment.java (Handles payment status)
+TrackOrderGUI.java (Displays delivery tracking via Google Maps)
+Receipt.java (Displays order receipt)
 
-OrientalCoffee/
-│
-├── CustomerApp/            # Java Swing app for customers
-│   ├── Login.java
-│   ├── Register.java
-│   ├── MenuGUI.java        # Static menu (hardcoded)
-│   └── PlaceOrderGUI.java
-│   ├── BackendConnector.java
-│   └── Main.java
-│   ├── NotificationHelper.java
-│   └── Payment.java
-│   ├── TrackOrderGUI.java
-│   └── Receipt.java
-│
-├── RiderApp/               # Java Swing app for riders
-│   ├── RiderLogin.java
-│   ├── RegisterRider.java
-│   ├── ViewTasks.java
-│   └── UpdateStatus.java
-│   ├── Main.java
-│   └── BackendConnectorRider.java
-|    
-│
-├── FoodDelivery_Backend   # PHP API backend
-│   ├── login.php
-│   ├── register.php
-│   ├── place_order.php
-│   ├── get_orders_rider.php
-│   ├── accept_order.php
-│   ├── mark_delivered.php
-│   └── db_config.php
-│   ├── update_payment_status.php
-│   └── get_orders.php
-│
-└── Database/
-└── food_deliverysystem.sql
+**RiderApp (Java Swing application for riders)**
+RiderLogin.java
+RegisterRider.java
+ViewTasks.java (Displays and manages delivery tasks)
+UpdateStatus.java (Marks order as delivered)
+Main.java (Main launcher class)
+BackendConnectorRider.java (Handles HTTP requests for rider actions)
 
-```
+**FoodDelivery_Backend (PHP API backend)**
+login.php
+register.php
+place_order.php
+get_orders_rider.php
+accept_order.php
+mark_delivered.php
+db_config.php
+update_payment_status.php
+get_orders.php (Returns customer-specific order data)
+
+**Database**
+food_deliverysystem.sql (SQL dump file containing tables and data for the project)
+
 
 ## 🚀 Features
 
